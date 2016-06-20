@@ -1,15 +1,12 @@
 const ENTIRE_STATE = '__ENTIRE_STATE__';
 const EMPTY_STATE = '__EMPTY_STATE__';
 
-const isServer = typeof window === 'undefined';
+const dataStore = {};
+const queryStore = {};
 
-if (!isServer) {
-  window.dataStore = {};
-  window.queryStore = {};
+if (typeof window !== 'undefined') {
+  window.memoryReplicator = { dataStore, queryStore };
 }
-
-const dataStore = window.dataStore;
-const queryStore = window.queryStore;
 
 function getItemKey(key, reducerKey) {
   if (reducerKey) {
