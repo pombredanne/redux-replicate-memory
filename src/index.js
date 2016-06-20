@@ -1,8 +1,12 @@
 const ENTIRE_STATE = '__ENTIRE_STATE__';
 const EMPTY_STATE = '__EMPTY_STATE__';
 
-window.dataStore = {};
-window.queryStore = {};
+const isServer = typeof window === 'undefined';
+
+if (!isServer) {
+  window.dataStore = {};
+  window.queryStore = {};
+}
 
 const dataStore = window.dataStore;
 const queryStore = window.queryStore;
@@ -38,7 +42,7 @@ function onStateChange({ key, reducerKey, queryable }, state, nextState) {
 
   dataStore[itemKey] = nextState;
 
-  if (queryable) {
+  if (queryable && queryableKey !== prevQueryableKey) {
     if (prevKeyMap) {
       delete prevKeyMap[key];
     }
@@ -61,7 +65,7 @@ function handleQuery(query, options, setResult) {
   Object.keys(query).forEach(reducerKey => {
     const state = query[reducerKey];
     const queryableKey = getQueryableKey(state, reducerKey, false);
-    const keyMap = queryStore[queryableKey];
+    const keyMap = queryStore[queryableKey] || {};
 
     if (keys) {
       for (let key in keys) {
@@ -70,7 +74,7 @@ function handleQuery(query, options, setResult) {
         }
       }
     } else {
-      keys = keyMap || {};
+      keys = { ...keyMap };
     }
   });
 
