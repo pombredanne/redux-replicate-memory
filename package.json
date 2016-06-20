@@ -1,6 +1,6 @@
 {
   "name": "redux-replicate-memory",
-  "version": "2.0.0-alpha.1",
+  "version": "2.0.0-alpha.2",
   "description": "Replicator for `redux-replicate` designed to *synchronously* persist the state of `redux` stores in memory.  Useful for universal rendering of replicator query results and optimistic queries.",
   "main": "./lib/index.js",
   "scripts": {
