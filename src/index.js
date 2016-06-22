@@ -1,12 +1,12 @@
-const ENTIRE_STATE = '__ENTIRE_STATE__';
-const EMPTY_STATE = '__EMPTY_STATE__';
-
 const dataStore = {};
 const queryStore = {};
 
 if (typeof window !== 'undefined') {
   window.memoryReplicator = { dataStore, queryStore };
 }
+
+const ENTIRE_STATE = '__ENTIRE_STATE__';
+const EMPTY_STATE = '__EMPTY_STATE__';
 
 function getItemKey(key, reducerKey) {
   if (reducerKey) {
@@ -53,6 +53,7 @@ function onStateChange({ key, reducerKey, queryable }, state, nextState) {
 }
 
 function handleQuery(query, options, setResult) {
+  const { begin = 0 } = options;
   let keys = null;
 
   if (typeof query !== 'object') {
@@ -77,10 +78,55 @@ function handleQuery(query, options, setResult) {
 
   keys = Object.keys(keys);
 
-  if (options.length) {
+  if (options.sortBy) {
+    for (let reducerKey in options.sortBy) {
+      if (options.select.indexOf(reducerKey) < 0) {
+        options.select.push(reducerKey);
+      }
+    }
+
+    getMultiple(keys, options.select, result => {
+      for (let reducerKey in options.sortBy) {
+        let ascending = options.sortBy[reducerKey] > 0;
+
+        result.sort(ascending
+          ? (a, b) => {
+            if (a[reducerKey] > b[reducerKey]) {
+              return 1;
+            } else if (a[reducerKey] < b[reducerKey]) {
+              return -1;
+            } else {
+              return 0;
+            }
+          }
+          : (a, b) => {
+            if (a[reducerKey] < b[reducerKey]) {
+              return 1;
+            } else if (a[reducerKey] > b[reducerKey]) {
+              return -1;
+            } else {
+              return 0;
+            }
+          }
+        );
+      }
+
+      if (typeof options.end !== 'undefined') {
+        setResult(result.slice(begin, options.end));
+      } else if (options.limit) {
+        setResult(result.slice(begin, begin + options.limit));
+      } else {
+        setResult(result);
+      }
+    });
+  } else if (options.length) {
     setResult(keys && keys.length || 0);
   } else if (options.keys) {
     setResult(keys);
+  } else if (typeof options.end !== 'undefined') {
+    setResult(result.slice(begin, options.end));
+  } else if (options.limit) {
+    setResult(result.slice(begin, begin + options.limit));
   } else {
     getMultiple(keys, options.select, setResult);
   }
