@@ -26,11 +26,13 @@ function getQueryableKey(state, reducerKey = ENTIRE_STATE) {
   return `${encodeURIComponent(reducerKey)}=${encodeURIComponent(state)}`;
 }
 
-function getInitialState({ key, reducerKey }, setState) {
+function getInitialState({ store, reducerKey, setState }) {
+  const { key } = store;
   setState(dataStore[getItemKey(key, reducerKey)]);
 }
 
-function onStateChange({ key, reducerKey, queryable }, state, nextState) {
+function onStateChange({ store, reducerKey, nextState, queryable }) {
+  const { key } = store;
   const itemKey = getItemKey(key, reducerKey);
   const prevQueryableKey = getQueryableKey(dataStore[itemKey], reducerKey);
   const prevKeyMap = queryStore[prevQueryableKey];
@@ -52,7 +54,7 @@ function onStateChange({ key, reducerKey, queryable }, state, nextState) {
   }
 }
 
-function handleQuery(query, options, setResult) {
+function handleQuery({ query, options, setResult }) {
   const { begin = 0 } = options;
   let keys = null;
 
@@ -141,8 +143,13 @@ function getMultiple(keys, reducerKeys, setResult) {
     result.push(item);
 
     for (let reducerKey of reducerKeys) {
-      getInitialState({ key, reducerKey }, state => {
-        item[reducerKey] = state;
+      getInitialState({
+        // TODO: figure out how to pass a store to handleQuery
+        store: { key },
+        reducerKey,
+        setState: state => {
+          item[reducerKey] = state;
+        }
       });
     }
   }
