@@ -31,7 +31,13 @@ function getInitialState({ store, reducerKey, setState }) {
   setState(dataStore[getItemKey(key, reducerKey)]);
 }
 
-function onStateChange({ store, reducerKey, nextState, queryable }) {
+function onStateChange({
+  store,
+  reducerKey,
+  nextState,
+  queryable,
+  setStatus
+}) {
   const { key } = store;
   const itemKey = getItemKey(key, reducerKey);
   const prevQueryableKey = getQueryableKey(dataStore[itemKey], reducerKey);
@@ -52,6 +58,8 @@ function onStateChange({ store, reducerKey, nextState, queryable }) {
 
     keyMap[key] = true;
   }
+
+  setStatus();
 }
 
 function handleQuery({ query, options, setResult }) {
